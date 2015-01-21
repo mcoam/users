@@ -5,7 +5,4 @@ class users::add_group {
 	 group {"admin":
                 ensure => present,
         }
-	 group {"conta":
-                ensure => present,
-        }
 }
