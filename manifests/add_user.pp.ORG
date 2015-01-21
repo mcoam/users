@@ -1,0 +1,49 @@
+define users::add_user ( 
+	$uid  	= '',
+	$user 	= '',
+	$realname = '',
+	$shell = ''
+){
+  group { 'itlinux':
+                ensure => "present",
+    }
+
+    user { $user:
+            uid         => $uid,
+            managehome  => true,
+	    comment  => $realname,
+	    shell   => $shell,
+	    group => 'itlinux',
+    }
+
+#   exec { "add_user_group":
+#    	command => "usermod -a -G itlinux $user",
+#    	path    => "/usr/local/bin/:/bin/",
+#   }
+
+    file { "/home/$user/":
+        ensure  => directory,
+        owner   => $user,
+        group   => $user,
+        mode    => 700,
+        require => [ User[$user], Group[$user] ]
+    }
+
+    file { "/home/$user/.ssh":
+            ensure  => directory,
+            owner   => $user,
+            group   => $user,
+            mode    => 700,
+            require => File["/home/$user/"]
+    }
+
+    file { "/home/$user/.ssh/authorized_keys":
+                ensure  => present,
+                source  => "puppet:///modules/users/$user.key",
+                owner   => $user,
+                group   => $user,
+                mode    => 0600,
+                require => File["/home/$user"]
+        }
+
+}
